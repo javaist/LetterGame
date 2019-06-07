@@ -39,8 +39,17 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void render(float delta) {
-
+        update(delta);
+        draw();
     }
+
+    public void update(float delta) {
+
+    };
+
+    public void draw() {
+
+    };
 
     @Override
     public void resize(int width, int height) {
