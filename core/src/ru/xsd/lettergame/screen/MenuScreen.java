@@ -31,16 +31,21 @@ public class MenuScreen extends BaseScreen {
     @Override
     public void render(float delta) {
         super.render(delta);
+        update(delta);
+        draw();
+    }
+
+    private void update(float delta){
+        catcher.update(delta);
+    }
+
+    private void draw(){
         Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-//		batch.draw(backgroundTexture, 0, 0);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        batch.begin();
         background.draw(batch);
-        catcher.draw(batch, touch);
-//		batch.draw(catcherTexture, frogPosition.x, frogPosition.y, 0.1f, 0.1f);
-		batch.end();
-
-
+        catcher.draw(batch);
+        batch.end();
     }
 
     @Override
@@ -55,6 +60,18 @@ public class MenuScreen extends BaseScreen {
         background.resize(worldBounds);
         catcher.resize(worldBounds);
         super.resize(worldBounds);
+    }
+
+    @Override
+    public boolean touchDown(Vector2 touch, int pointer) {
+        catcher.touchDown(touch, pointer);
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(Vector2 touch, int pointer) {
+        catcher.touchDragged(touch, pointer);
+        return false;
     }
 
     //    public boolean touchDown(int screenX, int screenY, int pointer, int button) {

@@ -10,7 +10,7 @@ import ru.xsd.lettergame.math.Rect;
 
 public class Catcher extends Sprite {
 
-    private Vector2 catcherPosition;
+    private Vector2 touchPosition;
     private float catcherSpeed;
     private Vector2 catcherDirection;
 
@@ -20,39 +20,23 @@ public class Catcher extends Sprite {
 
     public Catcher(TextureRegion region) {
         super(region);
-        catcherPosition = new Vector2(getLeft(), getBottom());
+        regions[0].getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        touchPosition = pos.cpy();
         catcherSpeed = 0.005f;
         catcherDirection = new Vector2();
 
-        regions[0].getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
     }
 
     @Override
     public void resize(Rect worldBounds) {
         setHeightProportion(0.1f);
         pos.set(worldBounds.pos);
-
         super.resize(worldBounds);
     }
 
-    public void draw(SpriteBatch batch, Vector2 touch) {
-        sq_distance = catcherPosition.dst2(touch);
-        sq_speed = catcherSpeed * catcherSpeed;
-//        System.out.println("Distance to point: " + sq_distance + "; catcherTexture speed: " + sq_speed);
-
-        if (sq_speed > sq_distance) {
-            catcherPosition.set(touch);
-        } else {
-            catcherDirection.x = touch.x - catcherPosition.x;
-            catcherDirection.y = touch.y - catcherPosition.y;
-            catcherDirection.nor();
-            catcherDirection.scl(catcherSpeed);
-            catcherPosition.add(catcherDirection);
-        }
-
-        setLeft(catcherPosition.x);
-        setBottom(catcherPosition.y);
-
+    public void draw(SpriteBatch batch) {
         batch.draw(
                 regions[frame],
                 getLeft(), getBottom(),
@@ -60,5 +44,35 @@ public class Catcher extends Sprite {
                 getWidth(), getHeight(),
                 scale, scale, angle
         );
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        sq_distance = pos.dst2(touchPosition);
+        sq_speed = catcherSpeed * catcherSpeed;
+//        System.out.println("Distance to point: " + sq_distance + "; catcherTexture speed: " + sq_speed);
+
+        if (sq_speed > sq_distance) {
+            pos.set(touchPosition);
+        } else {
+            catcherDirection.x = touchPosition.x - pos.x;
+            catcherDirection.y = touchPosition.y - pos.y;
+            catcherDirection.nor();
+            catcherDirection.scl(catcherSpeed);
+            pos.add(catcherDirection);
+        }
+    }
+
+    @Override
+    public boolean touchDown(Vector2 touch, int pointer) {
+        touchPosition = touch.cpy();
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(Vector2 touch, int pointer) {
+        System.out.println(touch);
+        touchPosition = touch.cpy();
+        return false;
     }
 }
