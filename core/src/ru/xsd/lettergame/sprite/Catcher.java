@@ -1,12 +1,15 @@
 package ru.xsd.lettergame.sprite;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.xsd.lettergame.base.Sprite;
 import ru.xsd.lettergame.math.Rect;
+import ru.xsd.lettergame.pool.BulletPool;
 
 public class Catcher extends Sprite {
 
@@ -19,23 +22,32 @@ public class Catcher extends Sprite {
     private float sq_distance;
     private float sq_speed;
 
+    private BulletPool bulletPool;
+    private TextureRegion bulletRegion;
+    private Vector2 bulletSpeed;
+    private Vector2 bulletPos;
+    private boolean bulletFirstGun = true;
 
-    public Catcher(TextureRegion region) {
-        super(region);
-        regions[0].getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-        touchPosition = pos.cpy();
+    public Catcher(TextureAtlas atlas, BulletPool bulletPool) {
+        super(atlas.findRegion("main_ship"), 1, 2, 2);
+
+        this.bulletPool = bulletPool;
+        this.bulletRegion = atlas.findRegion("bulletMainShip");
+        bulletSpeed = new Vector2(0, 0.2f);
+
+//        touchPosition = pos.cpy();
         catcherSpeed = 0.005f;
         catcherDirection = new Vector2();
 
-
+        bulletPos = new Vector2();
     }
 
     @Override
     public void resize(Rect worldBounds) {
         setHeightProportion(0.1f);
         this.worldBounds = worldBounds;
-        pos.set(worldBounds.pos);
+        setBottom(worldBounds.getBottom() + 0.03f);
         super.resize(worldBounds);
     }
 
@@ -51,7 +63,6 @@ public class Catcher extends Sprite {
 
     @Override
     public void update(float deltaTime) {
-        System.out.println(catcherDirection);
         if (touchPosition != null) {
             sq_distance = pos.dst2(touchPosition);
             sq_speed = catcherSpeed * catcherSpeed;
@@ -102,14 +113,26 @@ public class Catcher extends Sprite {
     @Override
     public boolean keyDown(int keycode) {
         touchPosition = null;
-        if (keycode == 19) {
-            catcherDirection.y = 1f;
-        } else if (keycode == 20) {
-            catcherDirection.y = -1f;
-        } else if (keycode == 21) {
-            catcherDirection.x = -1f;
-        } else if (keycode == 22) {
-            catcherDirection.x = 1f;
+        switch (keycode) {
+            case Input.Keys.W:
+            case Input.Keys.UP:
+                catcherDirection.y = 1f;
+                break;
+            case Input.Keys.S:
+            case Input.Keys.DOWN:
+                catcherDirection.y = -1f;
+                break;
+            case Input.Keys.A:
+            case Input.Keys.LEFT:
+                catcherDirection.x = -1f;
+                break;
+            case Input.Keys.D:
+            case Input.Keys.RIGHT:
+                catcherDirection.x = 1f;
+                break;
+            case Input.Keys.SPACE:
+                shoot();
+                break;
         }
         return false;
     }
@@ -122,5 +145,28 @@ public class Catcher extends Sprite {
             catcherDirection.x = 0f;
         }
         return false;
+    }
+
+    private void shoot() {
+        Bullet bullet = bulletPool.obtain();
+        bulletPos.set(pos);
+        if (bulletFirstGun) {
+            bulletPos.x += 0.02f;
+            bulletPos.y += 0.02f;
+            bulletFirstGun = false;
+        } else {
+            bulletPos.x -= 0.02f;
+            bulletPos.y += 0.02f;
+            bulletFirstGun = true;
+        }
+        bullet.set(
+                this,
+                bulletRegion,
+                bulletPos,
+                bulletSpeed,
+                0.01f,
+                worldBounds,
+                1
+        );
     }
 }

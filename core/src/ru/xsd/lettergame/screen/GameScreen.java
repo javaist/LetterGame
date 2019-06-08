@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.xsd.lettergame.base.BaseScreen;
 import ru.xsd.lettergame.math.Rect;
+import ru.xsd.lettergame.pool.BulletPool;
 import ru.xsd.lettergame.sprite.Background;
 import ru.xsd.lettergame.sprite.ButtonExit;
 import ru.xsd.lettergame.sprite.Catcher;
@@ -31,6 +32,8 @@ public class GameScreen extends BaseScreen {
     private TextureAtlas menuAtlas;
     private TextureAtlas atlas;
     private Star[] starArray;
+
+    private BulletPool bulletPool;
 
     private ButtonExit buttonExit;
 
@@ -57,7 +60,8 @@ public class GameScreen extends BaseScreen {
             starArray[i] = new Star(atlas);
         }
 
-        catcher = new Catcher(atlas.findRegion("main_ship").split(390/2, 287)[0][0]);
+        bulletPool = new BulletPool();
+        catcher = new Catcher(atlas, bulletPool);
 
         menuAtlas = new TextureAtlas("textures/menuAtlas.tpack");
         buttonExit = new ButtonExit(menuAtlas, game);
@@ -70,8 +74,15 @@ public class GameScreen extends BaseScreen {
         for (Star star : starArray) {
             star.update(delta);
         }
+        bulletPool.updateActiveSprites(delta);
+
         catcher.update(delta);
 
+        freePools();
+    }
+
+    private void freePools(){
+        bulletPool.freeActiveSprites();
     }
 
     @Override
@@ -85,6 +96,7 @@ public class GameScreen extends BaseScreen {
         for (Star star: starArray) {
             star.draw(batch);
         }
+        bulletPool.drawActiveSprites(batch);
         catcher.draw(batch);
 
         buttonExit.draw(batch);
@@ -109,6 +121,7 @@ public class GameScreen extends BaseScreen {
         atlas.dispose();
         menuAtlas.dispose();
         backgroundTexture.dispose();
+        bulletPool.dispose();
         super.dispose();
     }
 
