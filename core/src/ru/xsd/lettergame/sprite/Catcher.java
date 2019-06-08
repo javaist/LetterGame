@@ -1,6 +1,7 @@
 package ru.xsd.lettergame.sprite;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -27,20 +28,25 @@ public class Catcher extends Sprite {
     private Vector2 bulletSpeed;
     private Vector2 bulletPos;
     private boolean bulletFirstGun = true;
+    private final float BULLET_COOLDOWN = 0.5f;
+    private float bulletCooldown;
+    private Sound bulletSound;
 
 
-    public Catcher(TextureAtlas atlas, BulletPool bulletPool) {
+    public Catcher(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
 
         this.bulletPool = bulletPool;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         bulletSpeed = new Vector2(0, 0.2f);
-
+        bulletPos = new Vector2();
+        bulletCooldown = BULLET_COOLDOWN;
+        this.bulletSound = bulletSound;
 //        touchPosition = pos.cpy();
         catcherSpeed = 0.005f;
         catcherDirection = new Vector2();
 
-        bulletPos = new Vector2();
+
     }
 
     @Override
@@ -63,6 +69,12 @@ public class Catcher extends Sprite {
 
     @Override
     public void update(float deltaTime) {
+        if (bulletCooldown > 0) {
+            bulletCooldown -= deltaTime;
+        } else {
+            shoot();
+            bulletCooldown = BULLET_COOLDOWN;
+        }
         if (touchPosition != null) {
             sq_distance = pos.dst2(touchPosition);
             sq_speed = catcherSpeed * catcherSpeed;
@@ -130,9 +142,6 @@ public class Catcher extends Sprite {
             case Input.Keys.RIGHT:
                 catcherDirection.x = 1f;
                 break;
-            case Input.Keys.SPACE:
-                shoot();
-                break;
         }
         return false;
     }
@@ -151,14 +160,15 @@ public class Catcher extends Sprite {
         Bullet bullet = bulletPool.obtain();
         bulletPos.set(pos);
         if (bulletFirstGun) {
-            bulletPos.x += 0.02f;
+            bulletPos.x += 0.025f;
             bulletPos.y += 0.02f;
             bulletFirstGun = false;
         } else {
-            bulletPos.x -= 0.02f;
+            bulletPos.x -= 0.025f;
             bulletPos.y += 0.02f;
             bulletFirstGun = true;
         }
+        bulletSound.play(0.05f);
         bullet.set(
                 this,
                 bulletRegion,

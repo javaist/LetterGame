@@ -2,6 +2,8 @@ package ru.xsd.lettergame.screen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -33,6 +35,9 @@ public class GameScreen extends BaseScreen {
     private TextureAtlas atlas;
     private Star[] starArray;
 
+    private Music music;
+    private Sound bulletSound;
+
     private BulletPool bulletPool;
 
     private ButtonExit buttonExit;
@@ -50,6 +55,9 @@ public class GameScreen extends BaseScreen {
         background.setTop(0f);
         background2.setTop(2f);
 
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+        music.setLooping(true);
+        music.play();
 
 //        catcherTexture = new Texture("frog.png");
 
@@ -61,7 +69,9 @@ public class GameScreen extends BaseScreen {
         }
 
         bulletPool = new BulletPool();
-        catcher = new Catcher(atlas, bulletPool);
+        bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
+
+        catcher = new Catcher(atlas, bulletPool, bulletSound);
 
         menuAtlas = new TextureAtlas("textures/menuAtlas.tpack");
         buttonExit = new ButtonExit(menuAtlas, game);
