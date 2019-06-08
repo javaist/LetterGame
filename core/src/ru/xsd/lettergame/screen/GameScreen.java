@@ -2,6 +2,8 @@ package ru.xsd.lettergame.screen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -10,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.xsd.lettergame.base.BaseScreen;
 import ru.xsd.lettergame.math.Rect;
+import ru.xsd.lettergame.pool.BulletPool;
 import ru.xsd.lettergame.sprite.Background;
 import ru.xsd.lettergame.sprite.ButtonExit;
 import ru.xsd.lettergame.sprite.Catcher;
@@ -32,6 +35,11 @@ public class GameScreen extends BaseScreen {
     private TextureAtlas atlas;
     private Star[] starArray;
 
+    private Music music;
+    private Sound bulletSound;
+
+    private BulletPool bulletPool;
+
     private ButtonExit buttonExit;
 
     public GameScreen(Game game) {
@@ -47,6 +55,9 @@ public class GameScreen extends BaseScreen {
         background.setTop(0f);
         background2.setTop(2f);
 
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+        music.setLooping(true);
+        music.play();
 
 //        catcherTexture = new Texture("frog.png");
 
@@ -57,7 +68,10 @@ public class GameScreen extends BaseScreen {
             starArray[i] = new Star(atlas);
         }
 
-        catcher = new Catcher(atlas.findRegion("main_ship").split(390/2, 287)[0][0]);
+        bulletPool = new BulletPool();
+        bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
+
+        catcher = new Catcher(atlas, bulletPool, bulletSound);
 
         menuAtlas = new TextureAtlas("textures/menuAtlas.tpack");
         buttonExit = new ButtonExit(menuAtlas, game);
@@ -70,8 +84,15 @@ public class GameScreen extends BaseScreen {
         for (Star star : starArray) {
             star.update(delta);
         }
+        bulletPool.updateActiveSprites(delta);
+
         catcher.update(delta);
 
+        freePools();
+    }
+
+    private void freePools(){
+        bulletPool.freeActiveSprites();
     }
 
     @Override
@@ -85,6 +106,7 @@ public class GameScreen extends BaseScreen {
         for (Star star: starArray) {
             star.draw(batch);
         }
+        bulletPool.drawActiveSprites(batch);
         catcher.draw(batch);
 
         buttonExit.draw(batch);
@@ -109,6 +131,7 @@ public class GameScreen extends BaseScreen {
         atlas.dispose();
         menuAtlas.dispose();
         backgroundTexture.dispose();
+        bulletPool.dispose();
         super.dispose();
     }
 

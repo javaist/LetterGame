@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.xsd.lettergame.math.Rect;
+import ru.xsd.lettergame.utils.Regions;
 
 public class Sprite extends Rect {
     protected float angle;
@@ -13,9 +14,17 @@ public class Sprite extends Rect {
     protected TextureRegion[] regions;
     protected int frame;
 
+    private boolean isDestroyed;
+
+    public Sprite(){};
+
     public Sprite(TextureRegion region) {
         this.regions = new TextureRegion[1];
         this.regions[0] = region;
+    }
+
+    public Sprite(TextureRegion region, int rows, int cols, int frames) {
+        this.regions = Regions.split(region, rows, cols, frames);
     }
 
     public void draw(SpriteBatch batch) {
@@ -79,4 +88,18 @@ public class Sprite extends Rect {
     public boolean keyUp(int keycode) {
         return false;
     }
+
+    public boolean isDestroyed() {
+        return isDestroyed;
+    }
+
+    public void destroy() {
+        isDestroyed = false;
+    }
+
+    public void free() {
+        isDestroyed = true;
+    }
+
+
 }
