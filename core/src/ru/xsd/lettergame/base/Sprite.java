@@ -54,6 +54,8 @@ public class Sprite extends Rect {
         return false;
     }
 
+
+
     public float getAngle() {
         return angle;
     }
@@ -68,5 +70,13 @@ public class Sprite extends Rect {
 
     public void setScale(float scale) {
         this.scale = scale;
+    }
+
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    public boolean keyUp(int keycode) {
+        return false;
     }
 }
